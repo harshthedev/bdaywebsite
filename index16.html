@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Birthday Artifact</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;font-family:"Poppins",sans-serif;color:#fff;}
+
+/* Monthly backgrounds */
+.jan{background:linear-gradient(135deg,#ff758c,#ff7eb3);}
+.feb{background:linear-gradient(135deg,#667eea,#764ba2);}
+.mar{background:linear-gradient(135deg,#43cea2,#185a9d);}
+.apr{background:linear-gradient(135deg,#f7971e,#ffd200);}
+.may{background:linear-gradient(135deg,#56ab2f,#a8e063);}
+.jun{background:linear-gradient(135deg,#2193b0,#6dd5ed);}
+.jul{background:linear-gradient(135deg,#ee0979,#ff6a00);}
+.aug{background:linear-gradient(135deg,#f83600,#f9d423);}
+.sep{background:linear-gradient(135deg,#11998e,#38ef7d);}
+.oct{background:linear-gradient(135deg,#232526,#414345);}
+.nov{background:linear-gradient(135deg,#5f2c82,#49a09d);}
+.dec{background:linear-gradient(135deg,#141e30,#243b55);}
+
+/* Glass div fills screen */
+#app{width:100%;height:100%;display:flex;justify-content:center;align-items:center;}
+.glass{
+  width:90vw; height:90vh;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(25px);
+  border-radius:30px;
+  border:1px solid rgba(255,255,255,0.25);
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  position:relative; overflow:hidden; padding:20px;
+  box-shadow:0 8px 30px rgba(0,0,0,0.2);
+}
+.stack{text-align:center;margin-top:20px;}
+.stack h1{margin-bottom:10px;font-size:2.2em;}
+.stack p{margin-bottom:8px;font-size:1.1em;}
+
+/* Core container */
+.core-container{position:relative;width:200px;height:200px;display:flex;justify-content:center;align-items:center;}
+
+/* Core base (professional glass sphere) */
+.core{
+  width:120px; height:120px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  backdrop-filter: blur(12px);
+  border:1px solid rgba(255,255,255,0.3);
+  box-shadow:0 0 20px rgba(255,255,255,0.2), 0 8px 30px rgba(0,0,0,0.15);
+  display:flex; justify-content:center; align-items:center;
+  transition:all 0.6s ease, transform 0.3s ease;
+  cursor:pointer;
+}
+.core.floating{animation:float 4s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+
+/* Hover glow effect (classy white) */
+.core:hover{
+  box-shadow:0 0 40px rgba(255,255,255,0.4),0 8px 40px rgba(0,0,0,0.2); 
+  transform: scale(1.08);
+}
+
+/* Celebrate effect (white glow) */
+.core.celebrate{
+  transform:scale(1.5) rotate(360deg); 
+  box-shadow:0 0 60px rgba(255,255,255,0.7);
+}
+
+/* Celebrate button */
+.btn{margin-top:20px;padding:12px 30px;border-radius:40px;background:linear-gradient(135deg,#fff,#ddd);color:#000;font-weight:700;cursor:pointer;transition:0.3s;}
+.btn:hover{transform:scale(1.08);}
+
+/* Rain particles */
+.rain-drop{
+  position:fixed;
+  width:2px;
+  height:15px;
+  background:rgba(255,255,255,0.7);
+  top:-20px;
+  pointer-events:none;
+  animation:rain linear infinite;
+}
+@keyframes rain{
+  to{transform:translateY(110vh);}
+}
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<!-- Local audio file -->
+<audio id="birthdayAudio" src="happy_birthday.wav"></audio>
+
+<script>
+const NAME="Rain";
+const monthClasses=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+const monthThemes=[
+  {title:"This website will celebrate your Birthday till eternity",desc:"celebrate yourself every month"},
+  {title:"This website was made by a God",desc:"God orders you to learn something new"},
+  {title:"Happy bday again",desc:"Enjoy bhi krna"},
+  {title:"Come here every month",desc:"Read some books also"},
+  {title:"I have nothing new to say now",desc:"enjoy"},
+  {title:"Rain Sama",desc:"watch some anime also"},
+  {title:"Take care ",desc:""},
+  {title:"This website will celebrate your Birthday till eternity",desc:"Push beyond limits."},
+  {title:"This website will celebrate your Birthday till eternity",desc:"Cut distractions. Choose clarity."},
+  {title:"This website will celebrate your Birthday till eternity",desc:"Strength grows in silence."},
+  {title:"This website will celebrate your Birthday till eternity",desc:"Consistency beats motivation."},
+  {title:"❄️ Year-End Reflection",desc:"Honor the journey. Prepare again."}
+];
+
+let currentMonth=new Date().getMonth();
+let isBirthday=new Date().getDate()===25;
+
+// Build layout
+function buildLayout(month){
+  document.body.className='';
+  document.body.classList.add(monthClasses[month]);
+
+  document.getElementById("app").innerHTML=`
+  <div class="glass">
+    <div class="core-container">
+      <div class="core floating" id="monthCore"></div>
+    </div>
+    <div class="stack">
+      <h1>${isBirthday?"🎉 Happy Birthday, "+NAME:"Welcome ✨"}</h1>
+      <p>${monthThemes[month].title}</p>
+      <p>${monthThemes[month].desc}</p>
+      ${isBirthday?`<div class="btn" id="celebrateBtn">Celebrate 🎂</div>`:""}
+      <p id="extraMsg" class="hidden">✨ May this year reward your discipline ✨</p>
+    </div>
+  </div>`;
+
+  setupCore();
+  
+  if(isBirthday){
+    document.getElementById("celebrateBtn").addEventListener("click", ()=>{
+      const core=document.getElementById("monthCore");
+      const msg=document.getElementById("extraMsg");
+      core.classList.add("celebrate");
+      msg.classList.remove("hidden");
+      startRain();
+
+      // Play birthday tune
+      const audio=document.getElementById("birthdayAudio");
+      audio.currentTime=0;
+      audio.play();
+    });
+  }
+}
+
+// Minimal core setup (professional)
+function setupCore(){
+  const core=document.getElementById("monthCore");
+  core.className="core floating "+monthClasses[currentMonth];
+}
+
+// Mouse movement tilt
+document.addEventListener("mousemove",e=>{
+  const core=document.querySelector(".core");
+  if(core){
+    const x=(window.innerWidth/2 - e.clientX)/50;
+    const y=(window.innerHeight/2 - e.clientY)/50;
+    core.style.transform=`translate(${x}px,${y}px)`;
+  }
+});
+
+// Rain effect
+function startRain(){
+  for(let i=0;i<200;i++){
+    const drop=document.createElement("div");
+    drop.className="rain-drop";
+    drop.style.left=Math.random()*100+"vw";
+    drop.style.animationDuration=0.5 + Math.random()*1.5 + "s";
+    drop.style.opacity=0.3 + Math.random()*0.7;
+    document.body.appendChild(drop);
+    setTimeout(()=>drop.remove(),3000);
+  }
+}
+
+// Initial render
+buildLayout(currentMonth);
+</script>
+
+</body>
+</html>
